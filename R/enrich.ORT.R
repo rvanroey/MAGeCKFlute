@@ -68,6 +68,12 @@ enrich.ORT <- function(geneList,
                          minGSSize = 0, maxGSSize = max(limit),
                          TERM2NAME = pathways, pvalueCutoff = pvalueCutoff,
                          TERM2GENE = gene2path[,c("PathwayID","Gene")])
+
+  if(!is.null(enrichedRes) && nrow(enrichedRes@result)>0){
+    res = enrichedRes@result[enrichedRes@result$p.adjust<=pvalueCutoff, ]
+    res = res[order(res$pvalue), ]
+    enrichedRes@result = res
+  }
   return(enrichedRes)
 }
 
