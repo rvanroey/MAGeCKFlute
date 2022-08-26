@@ -59,11 +59,15 @@ RankView <- function(rankdata, genelist = NULL, decreasing = TRUE,
   p = ggplot(data, aes_string(x="Rank",y="diff",color="group"))
   p = p + geom_point(size = 0.5)
   # p = p + geom_hline(yintercept = cutoff, linetype = "dotted")
-  if(sum(idx)>0)
-    p = p + ggrepel::geom_text_repel(aes_string(label = "Gene"), data=data[idx,], size = 2.5, ...)
+  if(sum(idx)>0){
+    p = p + ggrepel::geom_text_repel(aes_string(label = "Gene", fill = "group"), data=data[idx,], size = 2.5,
+                                     point.padding = unit(0.3, "lines"), box.padding = unit(0.4, "lines"),
+                                     segment.size = 0.3, color = "black", xlim = c(100, 19000), arrow = arrow(length = unit(0.01, "npc")),
+                                     ...)
+  }
   p = p + scale_color_manual(values=mycolour)
   p = p + scale_fill_manual(values=mycolour)
-  p = p + labs(x = "Rank", y = "Score", title=main)
+  p = p + labs(x = "Rank", y = "Difference (Treatment - control)", title=main)
   p = p + theme_bw(base_size = 14)
   p = p + theme(plot.title = element_text(hjust = 0.5))
   p = p + theme(legend.position="none")#+ylim(-1000,7000)
