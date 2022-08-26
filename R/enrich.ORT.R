@@ -54,56 +54,22 @@ enrich.ORT <- function(geneList,
   ## Prepare gene set annotation
   gene2path = gsGetter(gmtpath, type, limit, organism)
   idx = duplicated(gene2path$PathwayID)
-  pathways = data.frame(PathwayID = gene2path$PathwayID[!idx],
+  pathways = data.table(PathwayID = gene2path$PathwayID[!idx],
                         PathwayName = gene2path$PathwayName[!idx],
                         stringsAsFactors = FALSE)
 
   ## Gene ID conversion
   gene = names(geneList)
-  if(keytype != "Entrez"){
-    allsymbol = names(geneList)
-    gene = TransGeneID(allsymbol, keytype, "Entrez", organism = organism)
-    idx = duplicated(gene)|is.na(gene)
-    geneList = geneList[!idx]; names(geneList) = gene[!idx]
-  }
-  if(!is.null(universe)){
-    universe = TransGeneID(universe, keytype, "Entrez", organism = organism)
-    universe = universe[!is.na(universe)]
-  }else{
-    universe = unique(c(gene, gene2path$Gene))
-  }
-  gene = names(geneList)
-
   ## Enrichment analysis
   len = length(unique(intersect(gene, gene2path$Gene)))
-  if(verbose) message("\t", len, " genes are mapped ...")
+  if(verbose) message("\t", len, " genes are mapped (ORT analysis)...")
   orgdb = getOrg(organism)$pkg
   enrichedRes = clusterProfiler::enricher(gene, universe = universe,
                          minGSSize = 0, maxGSSize = max(limit),
                          TERM2NAME = pathways, pvalueCutoff = pvalueCutoff,
                          TERM2GENE = gene2path[,c("PathwayID","Gene")])
-  if(!is.null(enrichedRes) && nrow(enrichedRes@result)>0){
-    res = enrichedRes@result[enrichedRes@result$p.adjust<=pvalueCutoff, ]
-    res = res[order(res$pvalue), ]
-    enrichedRes@result = res
-  }
-  ## Add enriched gene symbols into enrichedRes table
-  if(!is.null(enrichedRes) && nrow(enrichedRes@result)>0){
-    allsymbol = TransGeneID(gene, "Entrez", "Symbol", organism = organism)
-    geneID = strsplit(enrichedRes@result$geneID, split = "/")
-    geneName = lapply(geneID, function(gid){
-      SYMBOL = allsymbol[gid]; paste(SYMBOL, collapse = "/")
-    })
-    enrichedRes@result$geneName = unlist(geneName)
-    enrichedRes@result$NES = as.vector(sapply(enrichedRes@result$geneID, function(x){
-      enrichGenes = unlist(strsplit(x, split = "/"))
-      NES = mean(geneList[enrichGenes]) * length(enrichGenes)^0.6
-      return(NES)
-    }))
-    idx = c("ID", "Description", "NES", "pvalue", "p.adjust",
-            "GeneRatio", "BgRatio", "geneID", "geneName", "Count")
-    enrichedRes@result = enrichedRes@result[, idx]
-  }
   return(enrichedRes)
 }
+
+
 
