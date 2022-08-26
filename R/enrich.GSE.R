@@ -58,18 +58,9 @@ enrich.GSE <- function(geneList,
   ## Prepare gene set annotation
   gene2path = gsGetter(gmtpath, type, limit, organism)
   idx = duplicated(gene2path$PathwayID)
-  pathways = data.frame(PathwayID = gene2path$PathwayID[!idx],
+  pathways = data.table(PathwayID = gene2path$PathwayID[!idx],
                         PathwayName = gene2path$PathwayName[!idx],
                         stringsAsFactors = FALSE)
-
-  ## Gene ID conversion
-  if(keytype != "Entrez"){
-    allsymbol = names(geneList)
-    gene = TransGeneID(allsymbol, keytype, "Entrez", organism = organism)
-    idx = is.na(gene) | duplicated(gene)
-    geneList = geneList[!idx]
-    names(geneList) = gene[!idx]
-  }
 
   ## Enrichment analysis
   len = length(unique(intersect(names(geneList), gene2path$Gene)))
@@ -79,23 +70,6 @@ enrich.GSE <- function(geneList,
                      TERM2NAME = pathways, by = by,
                      TERM2GENE = gene2path[,c("PathwayID","Gene")],
                      verbose = verbose, ...)
-  ## Add enriched gene symbols into enrichedRes table
-  if(!is.null(enrichedRes) && nrow(enrichedRes@result)>0){
-    colnames(enrichedRes@result)[11] = "geneID"
-    # enrichedRes@result = EnrichedFilter(enrichedRes@result)
-    geneID = strsplit(enrichedRes@result$geneID, "/")
-    allsymbol = TransGeneID(names(geneList), "Entrez", "Symbol",
-                            organism = organism)
-    geneName = lapply(geneID, function(gid){
-      SYMBOL = allsymbol[gid]; paste(SYMBOL, collapse = "/")
-    })
-    enrichedRes@result$geneName = unlist(geneName)
-    enrichedRes@result$Count = unlist(lapply(geneID, length))
-    cnames = c("ID", "Description", "NES", "pvalue", "p.adjust",
-               "geneID", "geneName", "Count")
-    res = enrichedRes@result[, cnames]
-    res = res[order(res$pvalue), ]
-    enrichedRes@result = res
-  }
+
   return(enrichedRes)
 }

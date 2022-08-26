@@ -59,23 +59,6 @@ enrich.HGT = function(geneList,
                         PathwayName = gene2path$PathwayName[!idx],
                         stringsAsFactors = FALSE)
 
-  ## Gene ID conversion
-  if(tolower(keytype) != "entrez"){
-    allsymbol = names(geneList)
-    gene = TransGeneID(allsymbol, keytype, "entrez", organism = organism)
-    idx = duplicated(gene)|is.na(gene)
-    allsymbol = allsymbol[!idx]; names(allsymbol) = gene[!idx]
-    geneList = geneList[!idx]; names(geneList) = gene[!idx]
-  }else{
-    gene = names(geneList)
-    allsymbol = TransGeneID(gene, "Entrez", "Symbol", organism = organism)
-  }
-  if(!is.null(universe)){
-    universe = TransGeneID(universe, keytype, "Entrez", organism = organism)
-    universe = universe[!is.na(universe)]
-  }else{
-    universe = unique(gene2path$Gene)
-  }
   gene = names(geneList)
 
   ## Start to do the hypergeometric test ##
@@ -104,11 +87,11 @@ enrich.HGT = function(geneList,
 
   ## Test using above function ##
   len = length(unique(intersect(gene, gene2path$Gene)))
-  if(verbose) message("\t", len, " genes are mapped ...")
+  if(verbose) message("\t", len, " genes are mapped (HGT analysis)...")
   m = length(gene)
   n = length(universe) - m
   res = sapply(pathways$PathwayID, HGT)
-  res = as.data.frame(t(res), stringsAsFactors = FALSE)
+  res = as.data.table(t(res), stringsAsFactors = FALSE)
   res = res[!is.na(res$ID), ]
   if(nrow(res)>0){
     res[, c(1:2, 5:8)] = matrix(unlist(res[, c(1:2, 5:8)]), ncol = 6)
@@ -122,7 +105,7 @@ enrich.HGT = function(geneList,
       idx = c("ID", "Description", "NES", "pvalue", "p.adjust",
               "GeneRatio", "BgRatio", "geneID", "geneName", "Count")
       res = res[, idx]
-    }else res=data.frame()
+    }else res=data.table()
   }
 
   ## Create enrichResult object ##
@@ -135,4 +118,6 @@ enrich.HGT = function(geneList,
       gene           = as.character(gene),
       keytype        = keytype)
 }
+
+
 
