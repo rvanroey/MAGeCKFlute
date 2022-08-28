@@ -30,7 +30,7 @@
 
 ConsistencyView <- function(dat, ctrlname, treatname, main=NULL,
                           filename=NULL, width=5, height = 4, ...){
-  dd2 = data.frame(x = rowMeans(dat[,ctrlname,drop=FALSE]),
+  dd2 = data.table(x = rowMeans(dat[,ctrlname,drop=FALSE]),
                    y = rowMeans(dat[,treatname,drop=FALSE]))
   p = ScatterView(dd2, "x", "y", color="#1f78b4")
   p = p + geom_abline(slope = 1, intercept = 0, color="gray50", linetype=2, size=0.8)

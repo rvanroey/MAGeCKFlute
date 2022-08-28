@@ -55,7 +55,7 @@ enrich.HGT = function(geneList,
   ## Prepare gene set annotation
   gene2path = gsGetter(gmtpath, type, limit, organism)
   idx = duplicated(gene2path$PathwayID)
-  pathways = data.frame(PathwayID = gene2path$PathwayID[!idx],
+  pathways = data.table(PathwayID = gene2path$PathwayID[!idx],
                         PathwayName = gene2path$PathwayName[!idx],
                         stringsAsFactors = FALSE)
 
