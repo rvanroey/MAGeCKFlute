@@ -62,20 +62,35 @@ enrich.ORT <- function(geneList,
   gene = names(geneList)
   ## Enrichment analysis
   len = length(unique(intersect(gene, gene2path$Gene)))
-  if(verbose) message("\t", len, " genes are mapped (ORT analysis)...")
+  if(verbose) message("\t", len, " genes are mapped (ORT analysis) ...")
   orgdb = getOrg(organism)$pkg
   enrichedRes = clusterProfiler::enricher(gene, universe = universe,
-                         minGSSize = 0, maxGSSize = max(limit),
-                         TERM2NAME = pathways, pvalueCutoff = pvalueCutoff,
-                         TERM2GENE = gene2path[,c("PathwayID","Gene")])
-
+                                          minGSSize = 0, maxGSSize = max(limit),
+                                          TERM2NAME = pathways, pvalueCutoff = pvalueCutoff,
+                                          TERM2GENE = gene2path[,c("PathwayID","Gene")])
   if(!is.null(enrichedRes) && nrow(enrichedRes@result)>0){
     res = enrichedRes@result[enrichedRes@result$p.adjust<=pvalueCutoff, ]
     res = res[order(res$pvalue), ]
     enrichedRes@result = res
   }
+  ## Add enriched gene symbols into enrichedRes table
+  if(!is.null(enrichedRes) && nrow(enrichedRes@result)>0){
+    allsymbol = TransGeneID(gene, "Entrez", "Symbol", organism = organism)
+    geneID = strsplit(enrichedRes@result$geneID, split = "/")
+    geneName = lapply(geneID, function(gid){
+      SYMBOL = allsymbol[gid]; paste(SYMBOL, collapse = "/")
+    })
+    enrichedRes@result$geneName = unlist(geneName)
+    enrichedRes@result$NES = as.vector(sapply(enrichedRes@result$geneID, function(x){
+      enrichGenes = unlist(strsplit(x, split = "/"))
+      NES = mean(geneList[enrichGenes]) * length(enrichGenes)^0.6
+      return(NES)
+    }))
+    idx = c("ID", "Description", "NES", "pvalue", "p.adjust",
+            "GeneRatio", "BgRatio", "geneID", "geneName", "Count")
+    enrichedRes@result = enrichedRes@result[, idx]
+  }
   return(enrichedRes)
 }
-
 
 

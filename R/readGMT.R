@@ -23,7 +23,7 @@ ReadGMT <- function(gmtpath, limit = c(0, Inf)){
   c2_list = lapply(c2_list, function(x) x[-(1:2)])
   names(c2_list) = c2_pathway[,1]
   c2_len = lapply(c2_list, length)
-  gene2path = data.frame(Gene = unlist(c2_list), PathwayID = rep(names(c2_list), c2_len),
+  gene2path = data.table(Gene = unlist(c2_list), PathwayID = rep(names(c2_list), c2_len),
                          stringsAsFactors = FALSE)
   limit_pathways = names(c2_list)[c2_len>=limit[1] & c2_len<=limit[2]]
   gene2path = gene2path[gene2path$PathwayID%in%limit_pathways, ]
