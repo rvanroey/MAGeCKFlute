@@ -86,9 +86,6 @@ enrich.ORT <- function(geneList,
       NES = mean(geneList[enrichGenes]) * length(enrichGenes)^0.6
       return(NES)
     }))
-    idx = c("ID", "Description", "NES", "pvalue", "p.adjust",
-            "GeneRatio", "BgRatio", "geneID", "geneName", "Count")
-    enrichedRes@result = enrichedRes@result[, idx]
   }
   return(enrichedRes)
 }
