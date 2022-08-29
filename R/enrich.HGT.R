@@ -59,7 +59,25 @@ enrich.HGT = function(geneList,
                         PathwayName = gene2path$PathwayName[!idx],
                         stringsAsFactors = FALSE)
 
+  ## Gene ID conversion
+  if(tolower(keytype) != "entrez"){
+    allsymbol = names(geneList)
+    gene = TransGeneID(allsymbol, keytype, "entrez", organism = organism)
+    idx = duplicated(gene)|is.na(gene)
+    allsymbol = allsymbol[!idx]; names(allsymbol) = gene[!idx]
+    geneList = geneList[!idx]; names(geneList) = gene[!idx]
+  }else{
+    gene = names(geneList)
+    allsymbol = TransGeneID(gene, "Entrez", "Symbol", organism = organism)
+  }
+  if(!is.null(universe)){
+    universe = TransGeneID(universe, keytype, "Entrez", organism = organism)
+    universe = universe[!is.na(universe)]
+  }else{
+    universe = unique(gene2path$Gene)
+  }
   gene = names(geneList)
+
 
   ## Start to do the hypergeometric test ##
   HGT <- function(pid){
