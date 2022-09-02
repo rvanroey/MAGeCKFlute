@@ -296,7 +296,8 @@ ScatterView<-function(data, x = "x", y = "y", label = 0,
   }
 
   if(label.top)
-    p = p + ggrepel::geom_text_repel(...)
+    p = p + ggrepel::geom_label_repel(segment.color = "black",
+                                      ...)
   if(display_cut){
     if(length(x_cut)>0)
       p = p + geom_vline(xintercept = x_cut,linetype = "dotted")
