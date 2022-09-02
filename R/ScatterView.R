@@ -267,6 +267,13 @@ ScatterView<-function(data, x = "x", y = "y", label = 0,
   ## Plot the figure
   gg = gg[order(gg[,color]), ]
   p = ggplot(gg, aes_string(x, y, label="Label", color = color))
+  p = p + ggrepel::geom_label_repel(aes_string(x, y, label="Label", color = color),
+                                    segment.color = "black",
+                                    min.segment.length = 0,
+                                    point.padding = 0.1,
+                                    box.padding = 0.6,
+                                    seed = 1027, #For reproduction.
+                                    ...)
   if(all(c(shape,size)%in%colnames(gg)))
     p = p + geom_point(aes_string(shape = shape, size = size), alpha = alpha)
   else if(shape%in%colnames(gg))
@@ -296,9 +303,7 @@ ScatterView<-function(data, x = "x", y = "y", label = 0,
   }
 
   if(label.top)
-    p = p + ggrepel::geom_label_repel(aes_string(x, y, label="Label", color = color),
-                                      segment.color = "black",
-                                      ...)
+    p = p
   if(display_cut){
     if(length(x_cut)>0)
       p = p + geom_vline(xintercept = x_cut,linetype = "dotted")
