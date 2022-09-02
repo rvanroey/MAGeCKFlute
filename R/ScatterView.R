@@ -296,7 +296,8 @@ ScatterView<-function(data, x = "x", y = "y", label = 0,
   }
 
   if(label.top)
-    p = p + ggrepel::geom_label_repel(segment.color = "black",
+    p = p + ggrepel::geom_label_repel(aes_string(x, y, label="Label", color = color),
+                                      segment.color = "black",
                                       ...)
   if(display_cut){
     if(length(x_cut)>0)
